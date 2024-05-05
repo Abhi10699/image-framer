@@ -1,5 +1,3 @@
 /target
 *.jpg
 *.png
-!test.jpg
-!output.png
