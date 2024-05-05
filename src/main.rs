@@ -27,7 +27,7 @@ fn find_center_position(background: Object, foreground: Object) -> Position {
 }
 
 fn main() {
-    let mut image_file = image::open("../test_2.jpg").unwrap().into_rgb8();
+    let mut image_file = image::open("./test.jpg").unwrap().into_rgb8();
     
     let aspect_ratio: f32 = image_file.height() as f32 / image_file.width() as f32;
 
