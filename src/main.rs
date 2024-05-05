@@ -9,9 +9,10 @@ struct Args {
     #[arg(short, long)]
     input: String,
 
-    /// Output Image Path
+    /// Output Image Path with output image name eg. ./output.png
     #[arg(short, long)]
     output: String,
+
 }
 
 #[derive(Debug)]
@@ -84,5 +85,5 @@ fn main() {
         center_pos.x.into(),
         center_pos.y.into(),
     );
-    white_image.save(cli_args.output + "output.png").unwrap();
+    white_image.save(cli_args.output).unwrap();
 }
