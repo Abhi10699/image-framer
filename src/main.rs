@@ -47,26 +47,25 @@ fn find_center_position(background: ImageDimension, foreground: ImageDimension) 
     }
 }
 
+fn calculate_overlay_size(
+    overlay_image: &ImageBuffer<Rgb<u8>, Vec<u8>>,
+    target_width: i32,
+) -> ImageDimension {
+    let aspect_ratio: f32 = overlay_image.height() as f32 / overlay_image.width() as f32;
+    ImageDimension {
+        w: target_width,
+        h: (target_width as f32 * aspect_ratio) as i32,
+    }
+}
+
 fn main() {
     let cli_args = Args::parse();
 
+    const TARGET_WIDTH: i32 = 970;
     let mut foreground_image = image::open(cli_args.input).unwrap().into_rgb8();
-
-    let aspect_ratio: f32 = foreground_image.height() as f32 / foreground_image.width() as f32;
-
-    println!(
-        "Height: {height}, Width: {width}, aspect_ratio: {ar}",
-        height = foreground_image.height(),
-        width = foreground_image.width(),
-        ar = aspect_ratio,
-    );
-
     let mut white_image = RgbImage::from_pixel(1080, 1920, Rgb { 0: [255, 255, 255] });
 
-    let new_size = ImageDimension {
-        w: 970,
-        h: (970.0 * aspect_ratio) as i32,
-    };
+    let new_size = calculate_overlay_size(&foreground_image, TARGET_WIDTH);
 
     foreground_image = imageops::resize(
         &foreground_image,
@@ -76,9 +75,7 @@ fn main() {
     );
 
     let background = ImageDimension::from_image_buffer(&white_image);
-
     let foreground = ImageDimension::from_image_buffer(&foreground_image);
-
     let center_pos = find_center_position(background, foreground);
 
     imageops::overlay(
