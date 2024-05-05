@@ -1,18 +1,26 @@
 use clap::Parser;
 use image::{self, imageops, ImageBuffer, Rgb, RgbImage};
+use std::process::Command;
 
 // Simple tool to overlay images on a white backdrop
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    /// Input Image Path
+    // Input Image Path
     #[arg(short, long)]
     input: String,
 
-    /// Output Image Path with output image name eg. ./output.png
+    // Output director Path with output image name eg. ./
     #[arg(short, long)]
-    output: String,
+    output_path: String,
 
+    // Output director Path with output image name eg. ./
+    #[arg(short, long)]
+    output_file_name: String,
+
+    // Path of input intro video
+    #[arg(short, long)]
+    input_video_path: String,
 }
 
 #[derive(Debug)]
@@ -85,5 +93,44 @@ fn main() {
         center_pos.x.into(),
         center_pos.y.into(),
     );
-    white_image.save(cli_args.output).unwrap();
+
+    let image_file_path = format!(
+        "{}{}.png",
+        &cli_args.output_path, &cli_args.output_file_name
+    );
+
+    let video_file_path = format!(
+        "{}{}.mp4",
+        &cli_args.output_path, &cli_args.output_file_name
+    );
+
+    white_image.save(&image_file_path).unwrap();
+
+    // Run ffmpeg command
+
+    match Command::new("ffmpeg")
+        .args([
+            "-loop",
+            "1",
+            "-framerate",
+            "30",
+            "-t",
+            "5",
+            "-i",
+            &image_file_path,
+            "-i",
+            &cli_args.input_video_path,
+            "-filter_complex",
+            "[1][0]concat=n=2:v=1:a=0",
+            &video_file_path,
+        ])
+        .output()
+    {
+        Ok(_) => {
+            println!("Merge successful")
+        }
+        Err(message) => {
+            println!("{}", message.to_string())
+        }
+    };
 }
