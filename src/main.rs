@@ -1,4 +1,4 @@
-mod merger;
+mod utils;
 mod overlay;
 
 use clap::Parser;
@@ -43,7 +43,7 @@ fn main() {
     overlayed_image.save(&image_file_path).unwrap();
 
     // Run ffmpeg command
-    if merger::merge_mp4_image(image_file_path, &cli_args.input_video_path, video_file_path) {
+    if utils::merge_mp4_image(image_file_path, &cli_args.input_video_path, video_file_path) {
         println!("Merge Sucessful")
     }
     else {
