@@ -1,52 +1,37 @@
-mod utils;
-mod overlay;
+use dotenv::{dotenv, var};
 
-use clap::Parser;
+use serenity::async_trait;
+use serenity::model::channel::Message;
+use serenity::prelude::*;
 
-use crate::overlay::Overlay;
+struct Handler;
 
-// Simple tool to overlay images on a white backdrop
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-struct Args {
-    // Input Image Path
-    #[arg(short, long)]
-    input: String,
-
-    // Output director Path with output image name eg. ./
-    #[arg(short, long)]
-    output_path: String,
-
-    // Output director Path with output image name eg. ./
-    #[arg(short, long)]
-    output_file_name: String,
-
-    // Path of input intro video
-    #[arg(short, long)]
-    input_video_path: String,
+#[async_trait]
+impl EventHandler for Handler {
+    async fn message(&self, ctx: Context, msg: Message) {
+        if msg.content == "!ping" {
+            if let Err(why) = msg.channel_id.say(&ctx.http, "Pong!").await {
+                println!("Error sending message: {why:?}");
+            }
+        }
+    }
 }
 
-fn main() {
-    let cli_args = Args::parse();
-    let overlayed_image = Overlay::overlay_white_backdrop(&cli_args.input);
+#[tokio::main]
+async fn main() {
+    dotenv().ok();
 
-    let image_file_path = format!(
-        "{}{}.png",
-        &cli_args.output_path, &cli_args.output_file_name
-    );
+    let token = var("DISCORD_TOKEN").unwrap();
+    let intents = GatewayIntents::GUILD_MESSAGES
+        | GatewayIntents::DIRECT_MESSAGES
+        | GatewayIntents::MESSAGE_CONTENT;
 
-    let video_file_path = format!(
-        "{}{}.mp4",
-        &cli_args.output_path, &cli_args.output_file_name
-    );
+    let mut client = Client::builder(&token, intents)
+        .event_handler(Handler)
+        .await
+        .expect("Err creating client");
 
-    overlayed_image.save(&image_file_path).unwrap();
-
-    // Run ffmpeg command
-    if utils::merge_mp4_image(image_file_path, &cli_args.input_video_path, video_file_path) {
-        println!("Merge Sucessful")
-    }
-    else {
-        println!("Something went wrong!")
+    if let Err(why) = client.start().await {
+        println!("Client error: {why:?}");
     }
 }
