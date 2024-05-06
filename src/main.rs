@@ -1,7 +1,7 @@
+mod utils;
 mod overlay;
 
 use clap::Parser;
-use std::process::Command;
 
 use crate::overlay::Overlay;
 
@@ -26,34 +26,6 @@ struct Args {
     input_video_path: String,
 }
 
-fn merge_mp4_image(image_file_path: String, cli_args: Args, video_file_path: String) {
-    match Command::new("ffmpeg")
-        .args([
-            "-loop",
-            "1",
-            "-framerate",
-            "30",
-            "-t",
-            "5",
-            "-i",
-            &image_file_path,
-            "-i",
-            &cli_args.input_video_path,
-            "-filter_complex",
-            "[1][0]concat=n=2:v=1:a=0",
-            &video_file_path,
-        ])
-        .output()
-    {
-        Ok(_) => {
-            println!("Merge successful")
-        }
-        Err(message) => {
-            println!("{}", message.to_string())
-        }
-    };
-}
-
 fn main() {
     let cli_args = Args::parse();
     let overlayed_image = Overlay::overlay_white_backdrop(&cli_args.input);
@@ -71,6 +43,10 @@ fn main() {
     overlayed_image.save(&image_file_path).unwrap();
 
     // Run ffmpeg command
-
-    merge_mp4_image(image_file_path, cli_args, video_file_path);
+    if utils::merge_mp4_image(image_file_path, &cli_args.input_video_path, video_file_path) {
+        println!("Merge Sucessful")
+    }
+    else {
+        println!("Something went wrong!")
+    }
 }
