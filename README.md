@@ -1,7 +1,6 @@
-## Rust Image White Backdrop Tool
+## Instagram Photograph Reel Maker
+Create a Photographic Instagram Reel with a custom intro video followed by your featured photograph.
 
-A simple utility tool to overlay your images ona 9:16 portrait white backdrop
-
-## Example
-
-Refer test.jpg and output.png files
+**Purpose**
+--
+I really like the **I am a photographer and I took this photo** reel trend, so i made this tool to automate the process of making this reel. 
